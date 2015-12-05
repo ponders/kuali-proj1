@@ -1,5 +1,6 @@
 package com.kuali.proj1;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
@@ -32,6 +33,8 @@ public class Elevator implements PositionNotification {
     private static int WAITING_AFTER_MOVEMENT_SECONDS = 2;
     private static double FLOOR_POSITION_TOLERANCE = 0.001;
 
+    private static double MOVE_RATE_FLOORS_PER_SECOND = 0.1;
+
     private static int MAX_FLOOR = 1;
     private static int MIN_FLOOR = 1;
     public static void setMaxFloor(int maxFloor) {
@@ -42,10 +45,9 @@ public class Elevator implements PositionNotification {
         this.id = id;
     }
 
-
-
-    private void startMoving(int direction) {
-        // engages the engine
+    private void startMovingIfRequestOutstanding() {
+        // if the elevator has any outstanding requests, start moving toward closest request in the current direction
+        state = State.MOVING;
     }
     void positionNotification(double position) {
         // accepts position information from sensors or motor
@@ -60,8 +62,39 @@ public class Elevator implements PositionNotification {
     hasBeenServiced (or trip count at last service)
     inService
 
+    public boolean isAtFloor(int floor) {
 
-    makeRequest(int floor);
+    }
+
+    private int getDestinationFloor() {
+        // based on direction and proximity return the floor elevator wants to move to
+        if (direction == 1) {
+            Iterator<Integer> iterator = outstandingRequests.iterator();
+            while(iterator.hasNext()) {
+                Integer requestedFloor = iterator.next();
+                if (requestedFloor >= currentPosition) {
+                    return requestedFloor;
+                }
+            }
+        } else if (direction = -1) {
+            Iterator<Integer> iterator = outstandingRequests.descendingIterator();
+            while(iterator.hasNext()) {
+                Integer requestedFloor = iterator.next();
+                if (requestedFloor >= currentPosition) {
+                    return requestedFloor;
+                }
+            }
+        } else {
+
+        }
+        return 0; // no outstanding requests;
+    }
+
+    public void makeRequest(int floor) {
+        outstandingRequests.add(floor);
+    }
+
+
             isOccupied
     distance to target (includes transit to destination then to target)
 }
