@@ -3,7 +3,7 @@ package com.kuali.proj1;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 /**
@@ -22,9 +22,10 @@ public class Elevator implements PositionNotification {
 
     private int id;
     private State state = State.DOORS_CLOSED;
+    private double stateStartTime = 0;
     private int direction = 0; // (-1 = down, 0 = not moving; 1 = up)
     private double currentPosition;
-    private SortedSet<Integer> outstandingRequests = new TreeSet();
+    private NavigableSet<Integer> outstandingRequests = new TreeSet();
     private boolean isOccupied = false;
     private List<ElevatorListener> listeners = new LinkedList();
 
@@ -66,21 +67,29 @@ public class Elevator implements PositionNotification {
 
     }
 
+    private double distanceToFloorDirect() {
+        // calculates
+    }
+
+    private int getDestinationFloorUp() {
+        Iterator<Integer> iterator = outstandingRequests.iterator();
+        while(iterator.hasNext()) {
+            Integer requestedFloor = iterator.next();
+            if (requestedFloor >= currentPosition) {
+                return requestedFloor;
+            }
+        }
+        return 0; // no outstanding up requests;
+    }
+
     private int getDestinationFloor() {
         // based on direction and proximity return the floor elevator wants to move to
         if (direction == 1) {
-            Iterator<Integer> iterator = outstandingRequests.iterator();
-            while(iterator.hasNext()) {
-                Integer requestedFloor = iterator.next();
-                if (requestedFloor >= currentPosition) {
-                    return requestedFloor;
-                }
-            }
-        } else if (direction = -1) {
+        } else if (direction == -1) {
             Iterator<Integer> iterator = outstandingRequests.descendingIterator();
             while(iterator.hasNext()) {
                 Integer requestedFloor = iterator.next();
-                if (requestedFloor >= currentPosition) {
+                if (requestedFloor <= currentPosition) {
                     return requestedFloor;
                 }
             }
@@ -92,6 +101,32 @@ public class Elevator implements PositionNotification {
 
     public void makeRequest(int floor) {
         outstandingRequests.add(floor);
+    }
+
+
+    // handles the time simulation, called on an interval such as 1/10th second
+    private void timerEvent() {
+
+        switch (state) {
+        case DOORS_CLOSED:
+            // if currentTime - stateStartTime > WAITING_BEFORE_MOVEMENT_SECONDS, calculate destination and start moving
+            break;
+        case DOORS_OPENING:
+            // if currentTime - stateStartTime > time it takes to open doors, transition to DOORS_OPEN
+            break;
+        case DOORS_OPEN:
+            // if currentTime - stateStartTime > DOORS_OPEN_WAIT_SECONDS, transition to DOORS_CLOSING
+            break;
+        case DOORS_CLOSING:
+            // if currentTime - stateStartTime > time it takes to close doors, transition to DOORS_CLOSED
+            break;
+        case MOVING:
+            // update position based on currentTime - stateStartTime, MOVE_RATE_FLOORS_PER_SECOND & direction, calculate requested floor, if we're there transition to WAITING_AFTER_MOVEMENT
+            break;
+        case WAITING_AFTER_MOVEMENT:
+            // if currentTime - stateStartTime > time it takes to close doors, transition to DOORS_CLOSED
+            break;
+        }
     }
 
 
