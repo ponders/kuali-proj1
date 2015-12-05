@@ -12,7 +12,7 @@ import java.util.TreeSet;
  */
 public class Elevator implements PositionNotification {
     private enum State {
-        DOORS_CLOSED(1), DOORS_OPENING(2), DOORS_OPEN(3), DOORS_CLOSING(4), WAITING_BEFORE_MOVEMENT(5), MOVING(6), WAITING_AFTER_MOVEMENT(7);
+        DOORS_CLOSED(1), DOORS_OPENING(2), DOORS_OPEN(3), DOORS_CLOSING(4), MOVING(6), WAITING_AFTER_MOVEMENT(7), IN_MAINTENANCE(8);
         private Integer id;
 
         private State(Integer id) {
@@ -63,14 +63,6 @@ public class Elevator implements PositionNotification {
     hasBeenServiced (or trip count at last service)
     inService
 
-    public boolean isAtFloor(int floor) {
-
-    }
-
-    private double distanceToFloorDirect() {
-        // calculates
-    }
-
     private int getDestinationFloorUp() {
         Iterator<Integer> iterator = outstandingRequests.iterator();
         while(iterator.hasNext()) {
@@ -82,49 +74,72 @@ public class Elevator implements PositionNotification {
         return 0; // no outstanding up requests;
     }
 
+    private int getDestinationFloorDown() {
+        Iterator<Integer> iterator = outstandingRequests.descendingIterator();
+        while(iterator.hasNext()) {
+            Integer requestedFloor = iterator.next();
+            if (requestedFloor <= currentPosition) {
+                return requestedFloor;
+            }
+        }
+        return 0; // no outstanding up requests;
+    }
+
     private int getDestinationFloor() {
         // based on direction and proximity return the floor elevator wants to move to
+        int floor = 0;
         if (direction == 1) {
+            floor = getDestinationFloorUp();
         } else if (direction == -1) {
-            Iterator<Integer> iterator = outstandingRequests.descendingIterator();
-            while(iterator.hasNext()) {
-                Integer requestedFloor = iterator.next();
-                if (requestedFloor <= currentPosition) {
-                    return requestedFloor;
+            floor = getDestinationFloorDown();
+        } else {
+            // no direction, go to the nearest floor either direction
+            int upFloor = getDestinationFloorUp();
+            int downFloor = getDestinationFloorDown();
+            if (upFloor == 0) {
+                floor = downFloor; // either both zero, or downFloor is closest
+            } else {
+                if (downFloor == 0) {
+                    floor = upFloor;
+                } else if (currentPosition - downFloor <= upFloor - currentPosition) {
+                    floor = downFloor;
+                } else {
+                    floor = upFloor;
                 }
             }
-        } else {
 
         }
-        return 0; // no outstanding requests;
+        return floor;
     }
 
     public void makeRequest(int floor) {
+        // TODO: check that floor is within the bounds
         outstandingRequests.add(floor);
     }
 
-
     // handles the time simulation, called on an interval such as 1/10th second
     private void timerEvent() {
-
         switch (state) {
         case DOORS_CLOSED:
-            // if currentTime - stateStartTime > WAITING_BEFORE_MOVEMENT_SECONDS, calculate destination and start moving
+            // if currentTime - stateStartTime > WAITING_BEFORE_MOVEMENT_SECONDS,
+            // calculate destination and start moving
             break;
         case DOORS_OPENING:
-            // if currentTime - stateStartTime > time it takes to open doors, transition to DOORS_OPEN
+            // if currentTime - stateStartTime > time it takes to open doors, transition to DOORS_OPEN & notify
             break;
         case DOORS_OPEN:
-            // if currentTime - stateStartTime > DOORS_OPEN_WAIT_SECONDS, transition to DOORS_CLOSING
+            // if currentTime - stateStartTime > DOORS_OPEN_WAIT_SECONDS, transition to DOORS_CLOSING & notify
             break;
         case DOORS_CLOSING:
-            // if currentTime - stateStartTime > time it takes to close doors, transition to DOORS_CLOSED
+            // if currentTime - stateStartTime > time it takes to close doors, transition to DOORS_CLOSED & notify
             break;
         case MOVING:
-            // update position based on currentTime - stateStartTime, MOVE_RATE_FLOORS_PER_SECOND & direction, calculate requested floor, if we're there transition to WAITING_AFTER_MOVEMENT
+            // update position based on currentTime - stateStartTime, MOVE_RATE_FLOORS_PER_SECOND & direction,
+            // calculate requested floor,
+            // if we're there: transition to WAITING_AFTER_MOVEMENT & notify at floor
             break;
         case WAITING_AFTER_MOVEMENT:
-            // if currentTime - stateStartTime > time it takes to close doors, transition to DOORS_CLOSED
+            // if currentTime - stateStartTime > time it takes to close doors, transition to DOORS_CLOSED & notify
             break;
         }
     }
