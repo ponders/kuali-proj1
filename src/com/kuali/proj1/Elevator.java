@@ -9,16 +9,28 @@ import java.util.TreeSet;
  * @author llebaron
  * @since 12/5/15
  */
-public class Elevator {
+public class Elevator implements PositionNotification {
+    private enum State {
+        DOORS_CLOSED(1), DOORS_OPENING(2), DOORS_OPEN(3), DOORS_CLOSING(4), WAITING_BEFORE_MOVEMENT(5), MOVING(6), WAITING_AFTER_MOVEMENT(7);
+        private Integer id;
+
+        private State(Integer id) {
+            this.id = id;
+        }
+    };
+
     private int id;
+    private State state = State.DOORS_CLOSED;
     private int direction = 0; // (-1 = down, 0 = not moving; 1 = up)
-    private float currentPosition;
+    private double currentPosition;
     private SortedSet<Integer> outstandingRequests = new TreeSet();
     private boolean isOccupied = false;
     private List<ElevatorListener> listeners = new LinkedList();
 
     private static int DOORS_OPEN_WAIT_SECONDS = 20;
-    private static int DOORS_CLOSED_TO_MOVE_WAIT_SECONDS = 2;
+    private static int WAITING_BEFORE_MOVEMENT_SECONDS = 2;
+    private static int WAITING_AFTER_MOVEMENT_SECONDS = 2;
+    private static double FLOOR_POSITION_TOLERANCE = 0.001;
 
     private static int MAX_FLOOR = 1;
     private static int MIN_FLOOR = 1;
@@ -32,8 +44,14 @@ public class Elevator {
 
 
 
-    private startMoving(int direction) { // engages the engine }
-    private
+    private void startMoving(int direction) {
+        // engages the engine
+    }
+    void positionNotification(double position) {
+        // accepts position information from sensors or motor
+        currentPosition = position;
+        if (position)
+    }
 
     doors opened (opening + open)?
     doors closed (closing + closed)?
@@ -49,5 +67,12 @@ public class Elevator {
 }
 
 /* this wants a state machine for the full simulation
+    at floor with doors closed
+    doors opening
+    doors open
+    doors closing
+    waiting before movement
+    moving
+    waiting after movement
 
  */
