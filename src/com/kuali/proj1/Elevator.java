@@ -10,7 +10,7 @@ import java.util.TreeSet;
  * @author llebaron
  * @since 12/5/15
  */
-public class Elevator implements PositionNotification {
+public class Elevator {
     private enum State {
         DOORS_CLOSED(1), DOORS_OPENING(2), DOORS_OPEN(3), DOORS_CLOSING(4), MOVING(6), WAITING_AFTER_MOVEMENT(7), IN_MAINTENANCE(8);
         private Integer id;
@@ -46,22 +46,12 @@ public class Elevator implements PositionNotification {
         this.id = id;
     }
 
-    private void startMovingIfRequestOutstanding() {
-        // if the elevator has any outstanding requests, start moving toward closest request in the current direction
-        state = State.MOVING;
-    }
-    void positionNotification(double position) {
-        // accepts position information from sensors or motor
-        currentPosition = position;
-        if (position)
-    }
-
-    doors opened (opening + open)?
-    doors closed (closing + closed)?
+/*
     trip count
     trip count service interval (constant)
     hasBeenServiced (or trip count at last service)
     inService
+*/
 
     private int getDestinationFloorUp() {
         Iterator<Integer> iterator = outstandingRequests.iterator();
@@ -122,7 +112,8 @@ public class Elevator implements PositionNotification {
         switch (state) {
         case DOORS_CLOSED:
             // if currentTime - stateStartTime > WAITING_BEFORE_MOVEMENT_SECONDS,
-            // calculate destination and start moving
+            // check that trip count no exceeded, if so transition to IN_MAINTENANCE
+            // otherwise calculate destination and start moving if any
             break;
         case DOORS_OPENING:
             // if currentTime - stateStartTime > time it takes to open doors, transition to DOORS_OPEN & notify
@@ -144,9 +135,20 @@ public class Elevator implements PositionNotification {
         }
     }
 
+    // these are used by the controller to decide which elevator to send
 
-            isOccupied
-    distance to target (includes transit to destination then to target)
+    public boolean isOccupied() {
+        return isOccupied;
+    }
+
+    public double distanceToFloor(int floor) {
+        // TODO; validate parameter
+        if (floor > currentPosition) {
+            return floor - currentPosition;
+        } else {
+            return currentPosition - floor;
+        }
+    }
 }
 
 /* this wants a state machine for the full simulation
