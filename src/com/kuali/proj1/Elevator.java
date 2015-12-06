@@ -39,6 +39,7 @@ public class Elevator {
     private static int MAX_FLOOR = 1;
     private static int MIN_FLOOR = 1;
     public static void setMaxFloor(int maxFloor) {
+        // TODO: validate parameter
         MAX_FLOOR = maxFloor;
     }
 
@@ -107,13 +108,13 @@ public class Elevator {
         outstandingRequests.add(floor);
     }
 
-    // handles the time simulation, called on an interval such as 1/10th second
+    // handles the time simulation, called on an interval such as every 1/10th second
     private void timerEvent() {
         switch (state) {
         case DOORS_CLOSED:
             // if currentTime - stateStartTime > WAITING_BEFORE_MOVEMENT_SECONDS,
             // check that trip count no exceeded, if so transition to IN_MAINTENANCE
-            // otherwise calculate destination and start moving if any
+            // otherwise calculate destination and if any start moving (set direction)
             break;
         case DOORS_OPENING:
             // if currentTime - stateStartTime > time it takes to open doors, transition to DOORS_OPEN & notify
@@ -136,7 +137,6 @@ public class Elevator {
     }
 
     // these are used by the controller to decide which elevator to send
-
     public boolean isOccupied() {
         return isOccupied;
     }
@@ -150,14 +150,3 @@ public class Elevator {
         }
     }
 }
-
-/* this wants a state machine for the full simulation
-    at floor with doors closed
-    doors opening
-    doors open
-    doors closing
-    waiting before movement
-    moving
-    waiting after movement
-
- */

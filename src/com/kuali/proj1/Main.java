@@ -3,7 +3,7 @@ package com.kuali.proj1;
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
+	// use args to get # elevators and top floor, instantiate ElevatorController and start the simulation
     }
 }
 
